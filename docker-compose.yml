@@ -1,0 +1,33 @@
+version: '3.1'
+services:
+  notes-app:
+    container_name: note-service-0.0.1
+    image: note-service-0.0.1
+    build: ./
+    ports:
+      - "8080:8080"
+    depends_on:
+      - notes-mysqldb
+    command: sh -c './wait-for notes-mysqldb:3306 -- npm start'
+    networks:
+      - samplenet
+  notes-mysqldb:
+    image: "mysql:8.0"
+    container_name: notes-mysqldb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    environment:
+      - MYSQL_DATABASE=notesdb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      samplenet:
+        aliases:
+          - "notes-mysqldb"
+
+networks:
+  samplenet:
+    driver: bridge
